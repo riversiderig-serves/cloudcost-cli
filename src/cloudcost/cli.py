@@ -166,6 +166,21 @@ def iac_map(
         sys.exit(1)
 
 @app.command()
+def report(
+    findings: str = typer.Option("data/findings.json", help="Path to findings JSON file"),
+    output: str = typer.Option("data/report.html", help="Output HTML report path"),
+):
+    """Render findings.json as a self-contained static HTML report."""
+    from cloudcost.report import write_report
+
+    try:
+        destination = write_report(findings, output)
+        console.print(f"[green]Report written to {destination}[/green]")
+    except (OSError, ValueError, json.JSONDecodeError) as e:
+        console.print(f"[red]Report generation failed: {e}[/red]")
+        raise typer.Exit(code=1)
+
+@app.command()
 def dashboard():
     """Launch the interactive CloudCost terminal dashboard."""
     from cloudcost.tui.app import run_dashboard
